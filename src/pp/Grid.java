@@ -13,6 +13,7 @@ public class Grid {
 
     /*
     Grid constructor.
+
     @param parent in order to let this class draw on the main context
     @param cellCountX the amount of cells in X direction
     @param cellCountY the amount of cells in Y direction
@@ -44,6 +45,7 @@ public class Grid {
 
     /*
     calculates the index of cells from the current mouse Position
+
     @return PVector the snapped X and Y indizes of the current mouse position
      */
     PVector getActiveIndizesXY() {
@@ -67,6 +69,7 @@ public class Grid {
 
     /*
     returns the width of each cells
+
     @return float the width of each cell
      */
     float getCellWidth() {
@@ -75,6 +78,7 @@ public class Grid {
 
     /*
     returns the height of each cell
+
     @return float the height of each cell
      */
     float getCellHeight() {
