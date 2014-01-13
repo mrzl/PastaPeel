@@ -24,14 +24,16 @@ public class PastaPeelPApplet extends PApplet {
     private String currentFileNamePNG;
 
     private ControlFrame controlFrame;
+    private boolean drawGrid;
 
     @Override
     public void setup() {
         size(800, 800, P2D);
-        grid = new Grid( this, 40, 40 );
+        grid = new Grid( this, 50, 50 );
         linePool = new LinePool( this );
         colorChooser = new ColorChooser( this );
         selectedColorIndex = 0;
+        drawGrid = true;
 
         controlFrame = ControlFrame.createControlFrame( this, "Controls", 400, 600 );
     }
@@ -44,7 +46,9 @@ public class PastaPeelPApplet extends PApplet {
         background( 127 );
 
         if( !savePdf ) {
-            grid.draw();
+            if( drawGrid ) {
+                grid.draw();
+            }
             grid.drawActiveBox();
         }
 
@@ -70,9 +74,7 @@ public class PastaPeelPApplet extends PApplet {
                 System.out.println( "Saved file: " + currentFileNamePDF + " + " + currentFileNamePNG );
                 break;
             case 'e':
-                lastLinesFileName = "last_lines.csv";
-                linePool.saveToFile( lastLinesFileName );
-                System.out.println( "Saved lines to " +  lastLinesFileName);
+                saveConfiguration("auto_export.lml");
                 break;
             case 'l':
                 lastLinesFileName = "last_lines.csv";
@@ -80,6 +82,21 @@ public class PastaPeelPApplet extends PApplet {
                 System.out.println( "Loaded lines from " + lastLinesFileName );
                 break;
         }
+    }
+
+    protected void saveConfiguration( String lastLinesFileName ) {
+        linePool.saveToFile( lastLinesFileName );
+        System.out.println( "Saved lines to " +  lastLinesFileName);
+    }
+
+
+     protected void loadConfiguration( String loadLinesFileName ) {
+        linePool.loadFromFile( loadLinesFileName );
+        System.out.println( "Loaded lines from " + loadLinesFileName );
+    }
+
+    protected void clearLines() {
+        linePool.clear();
     }
     /*
     Saves a PDF with the current output.
@@ -112,5 +129,21 @@ public class PastaPeelPApplet extends PApplet {
     public static void main( String[] args ) {
         // starting this PApplet
         PApplet.main( new String[ ] { "pp.PastaPeelPApplet" } );
+    }
+
+    public void drawCurrentColor( PApplet controlWindow ) {
+        controlWindow.stroke( 255 );
+        controlWindow.fill( colorChooser.getColor( selectedColorIndex ) );
+        controlWindow.rect( 140, 30, 50, 50 );
+    }
+
+    protected void randomColor( ) {
+        selectedColorIndex++;
+        selectedColorIndex %= colorChooser.getColorCount();
+        System.out.println( "Set selectedColorIndex to " + selectedColorIndex );
+    }
+
+    protected void toggleGrid() {
+        drawGrid = !drawGrid;
     }
 }

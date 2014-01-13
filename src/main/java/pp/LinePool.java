@@ -4,7 +4,8 @@ import processing.core.PApplet;
 import processing.core.PVector;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Marcel on 12.01.14.
@@ -15,11 +16,10 @@ public class LinePool {
     // holds the mouse position of the last click
     private PVector lastClick;
     private boolean firstClick;
-    // the container holding all previously drawn lines
-    private ArrayList< Line > lineContainer;
-    // container holding the specific color for each line. TODO: java.util.HashMap should do it, too.
-    private ArrayList< Integer > colorContainer;
+
     private ColorChooser colorChooser;
+    // the container holding all previously drawn lines
+    ConcurrentHashMap< Line, Integer > lines;
 
     /*
     LinePool constructor.
@@ -29,10 +29,9 @@ public class LinePool {
 
         this.colorChooser = new ColorChooser( this.parent );
 
-        this.lineContainer = new ArrayList<>();
-        this.colorContainer = new ArrayList<>();
-
         this.firstClick = true;
+
+        this.lines = new ConcurrentHashMap<>();
     }
 
     /*
@@ -42,9 +41,7 @@ public class LinePool {
     @param int lineColor the color of the added line
      */
     public void addLine( Line l, int lineColor ) {
-        lineContainer.add( l );
-        // adds a random color for now.
-        colorContainer.add( lineColor );
+        lines.put(l, lineColor);
     }
 
     /*
@@ -54,8 +51,13 @@ public class LinePool {
      */
     public void drawLines( int lineWidth ) {
         int index = 0;
-        for( Line l : lineContainer ){
-            int lineColor = colorContainer.get( index );
+        Iterator it = lines.entrySet().iterator();
+        while( it.hasNext() ) {
+            Map.Entry pairs = ( Map.Entry )it.next();
+
+            int lineColor = (int ) ( pairs.getValue() );
+            Line l = ( Line ) ( pairs.getKey() );
+
             l.draw( lineColor, lineWidth );
             index++;
         }
@@ -88,6 +90,10 @@ public class LinePool {
         firstClick = !firstClick;
     }
 
+    public void clear() {
+        lines.clear();
+    }
+
     /*
     Saves all currently created lines to a file.
 
@@ -102,11 +108,18 @@ public class LinePool {
             int counter = 0;
             // the delimiter, by which all tokens are separated
             String delimiter = ";";
-            for( Line l : lineContainer ) {
+
+            Iterator it = lines.entrySet().iterator();
+            while( it.hasNext() ) {
+                Map.Entry pairs = ( Map.Entry )it.next();
+
+                int lineColor = (int ) ( pairs.getValue() );
+                Line l = ( Line ) ( pairs.getKey() );
+
                 String lineToWrite = l.getStart().x + delimiter + l.getStart().y + delimiter +
                         l.getEnd().x + delimiter + l.getEnd().y + delimiter +
-                        colorChooser.getIndexByColor( colorContainer.get( counter ) ) + System.getProperty("line.separator");
-                linePoolWriter.write( lineToWrite );
+                        colorChooser.getIndexByColor( lineColor ) + System.getProperty("line.separator");
+                linePoolWriter.write(lineToWrite);
                 counter++;
             }
 
@@ -140,8 +153,7 @@ public class LinePool {
                 PVector end = new PVector( Float.parseFloat( fields[ 2 ] ), Float.parseFloat( fields[ 3 ] ) );
                 int colorIndex = Integer.parseInt( fields[ 4 ] );
                 Line loadedLine = new Line( parent, start.x, start.y, end.x, end.y );
-                lineContainer.add( loadedLine );
-                colorContainer.add( colorChooser.getColor( colorIndex ) );
+                lines.put( loadedLine, colorChooser.getColor( colorIndex ) );
             }
         } catch( Exception e ) {
             System.err.println( "Couldn't load file. Aborting." );

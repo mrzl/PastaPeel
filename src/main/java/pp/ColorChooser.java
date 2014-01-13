@@ -10,6 +10,7 @@ import java.util.ArrayList;
 public class ColorChooser {
     // an arraylist containing all available colors
     private ArrayList< Integer > colors;
+    private ArrayList< ColorPalette > palettes;
 
     /*
     the ColorChooser Contructor
@@ -18,6 +19,7 @@ public class ColorChooser {
      */
     public ColorChooser( PApplet parent ) {
         colors = new ArrayList<>();
+        palettes = new ArrayList<>();
 
         // adds lots of colors
         colors.add( parent.color( 0, 0, 0 ) ); // black

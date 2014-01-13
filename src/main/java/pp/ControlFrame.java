@@ -2,6 +2,7 @@ package pp;
 
 import controlP5.ControlEvent;
 import controlP5.ControlP5;
+import controlP5.Textfield;
 import processing.core.PApplet;
 
 import java.awt.*;
@@ -43,6 +44,18 @@ public class ControlFrame extends PApplet {
     public void setup() {
         cp = new ControlP5( this );
         cp.setBroadcast( false );
+
+        cp.addButton( "CHANGE COLOR" ).setPosition( 30, 30 ).setSize( 80 ,40 ).setValue( 0.0f );
+        cp.addButton( "TOGGLE GRID" ).setPosition( 30, 90 ).setSize( 80 ,40 ).setValue( 0.0f );
+        cp.addButton( "CLEAR" ).setPosition( 120, 30 ).setSize( 80 ,40 ).setValue( 0.0f );
+
+        cp.addTextfield( "savefilename" ).setPosition(20, 170).setSize(200, 20) .setFont(createFont("arial", 14)).setAutoClear(false);
+        cp.addButton( "saveFile" ).setPosition( 240, 170 ).setSize( 60 ,20 ).setValue( 0.0f );
+
+        cp.addTextfield( "loadfilename" ).setPosition(20, 210).setSize(200, 20) .setFont(createFont("arial", 14)).setAutoClear(false);
+        cp.addButton( "loadFile" ).setPosition( 240, 210 ).setSize( 60 ,20 ).setValue( 0.0f );
+
+        cp.setBroadcast( true );
     }
 
     /*
@@ -50,6 +63,19 @@ public class ControlFrame extends PApplet {
      */
     public void draw() {
         background(0);
+        parent.drawCurrentColor( this );
+    }
+
+    @SuppressWarnings( "unused" )
+    public void saveFile() {
+        String fileName = cp.get( Textfield.class, "savefilename" ).getText();
+        parent.saveConfiguration( fileName + ".lml" );
+    }
+
+    @SuppressWarnings( "unused" )
+    public void loadFile() {
+        String fileName = cp.get( Textfield.class, "loadfilename" ).getText();
+        parent.loadConfiguration( fileName );
     }
 
     /*
@@ -57,9 +83,17 @@ public class ControlFrame extends PApplet {
 
     @param ControlEvent e the ControlEvent containing all information about the event
      */
+    @SuppressWarnings( "unused" )
     public void controlEvent( ControlEvent e ) {
         switch( e.getName() ){
-            case "hey":
+            case "CHANGE COLOR":
+                parent.randomColor();
+                break;
+            case "TOGGLE GRID":
+                parent.toggleGrid();
+                break;
+            case "CLEAR":
+                parent.clearLines();
                 break;
         }
     }
