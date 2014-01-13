@@ -25,6 +25,7 @@ public class Line {
 
     /*
     draws the line
+
     @param color the color of the line
     @param lineWidth the width of the line
      */
@@ -38,10 +39,20 @@ public class Line {
         parent.popStyle();
     }
 
+    /*
+    returns a vector which contains the coordinates of the start point from this line
+
+    @return PVector the start point of the line
+     */
     public PVector getStart() {
         return new PVector( x1, y1 );
     }
 
+    /*
+    returns a vector which contains the coordinates of the end point from this line
+
+    @return PVector the end point of the line
+     */
     public PVector getEnd() {
         return new PVector( x2, y2 );
     }
