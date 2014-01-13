@@ -14,11 +14,11 @@ public class LinePool {
 
     // holds the mouse position of the last click
     private PVector lastClick;
+    private boolean firstClick;
     // the container holding all previously drawn lines
     private ArrayList< Line > lineContainer;
     // container holding the specific color for each line. TODO: java.util.HashMap should do it, too.
     private ArrayList< Integer > colorContainer;
-    // class that holts all different tape colors
     private ColorChooser colorChooser;
 
     /*
@@ -27,23 +27,29 @@ public class LinePool {
     public LinePool( PApplet parent ) {
         this.parent = parent;
 
-        colorChooser = new ColorChooser( this.parent );
+        this.colorChooser = new ColorChooser( this.parent );
 
-        lineContainer = new ArrayList<Line>();
-        colorContainer = new ArrayList<Integer>();
+        this.lineContainer = new ArrayList<>();
+        this.colorContainer = new ArrayList<>();
+
+        this.firstClick = true;
     }
 
     /*
     Adds a line to the container.
+
+    @param Line l the line which should be added
+    @param int lineColor the color of the added line
      */
-    public void addLine( Line l ) {
+    public void addLine( Line l, int lineColor ) {
         lineContainer.add( l );
         // adds a random color for now.
-        colorContainer.add( colorChooser.getColor( ( int ) ( parent.random( colorChooser.getColorCount() ) ) ) );
+        colorContainer.add( lineColor );
     }
 
     /*
     draws all previously laved lines.
+
     @param lineWidth the width of the line
      */
     public void drawLines( int lineWidth ) {
@@ -56,9 +62,12 @@ public class LinePool {
     }
 
     /*
-    everytime the mouse is pressed another start-/endpoint of lines is stored.
+    every time the mouse is pressed another start-/endpoint of lines is stored.
+
+    @param Grid grid the Grid, which contains information about its size etc.
+    @param int lineColor the currently selected line color
      */
-    public void mousePressed( Grid grid ) {
+    public void mousePressed( Grid grid, int lineColor ) {
         // calculating the X and Y coordinates of the lines snapped to the grid
         int xIndex = ( int ) ( grid.getActiveIndizesXY().x );
         int yIndex = ( int ) ( grid.getActiveIndizesXY().y) ;
@@ -67,17 +76,21 @@ public class LinePool {
         int snappedX = xIndex * cellWidth + ( cellWidth / 2 );
         int snappedY = yIndex * cellHeight + ( cellHeight / 2 );
 
-        // ignoring the very first click, because there is no firstClick
-        if( lastClick != null ) {
-            this.addLine( new Line( parent, ( int ) ( lastClick.x ), ( int ) ( lastClick.y ), snappedX, snappedY ) );
+        // always ignoring the first click of a line
+        if( !firstClick ) {
+            this.addLine( new Line( parent, ( int ) ( lastClick.x ), ( int ) ( lastClick.y ), snappedX, snappedY ), lineColor );
         }
 
         // saving the current snapped X for the next click
         lastClick = new PVector( snappedX, snappedY );
+
+        // loop this
+        firstClick = !firstClick;
     }
 
     /*
     Saves all currently created lines to a file.
+
     @param String fileName the name of the file
      */
     public void saveToFile( String fileName ) {
@@ -92,7 +105,7 @@ public class LinePool {
             for( Line l : lineContainer ) {
                 String lineToWrite = l.getStart().x + delimiter + l.getStart().y + delimiter +
                         l.getEnd().x + delimiter + l.getEnd().y + delimiter +
-                        counter + System.getProperty("line.separator");
+                        colorChooser.getIndexByColor( colorContainer.get( counter ) ) + System.getProperty("line.separator");
                 linePoolWriter.write( lineToWrite );
                 counter++;
             }
@@ -102,7 +115,9 @@ public class LinePool {
         } finally {
             try {
               linePoolWriter.close();
-            } catch ( Exception e ){
+            } catch ( NullPointerException e ){
+                System.err.println( "Couldn't close the BufferedWriter. Aborting." );
+            } catch( IOException e ) {
                 System.err.println( "Couldn't close the BufferedWriter. Aborting." );
             }
         }
@@ -110,12 +125,13 @@ public class LinePool {
 
     /*
     Loads lines from a file.
+
     @param String fileName the filename where the lines are saved
      */
     public void loadFromFile( String fileName ) {
         BufferedReader fileReader = null;
         String delimiter = ";";
-        String currentLine = "";
+        String currentLine;
         try {
             fileReader = new BufferedReader( new FileReader( fileName ) );
             while( ( currentLine = fileReader.readLine() ) != null ) {
