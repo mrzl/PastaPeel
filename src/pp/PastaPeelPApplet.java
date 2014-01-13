@@ -13,6 +13,9 @@ public class PastaPeelPApplet extends PApplet {
     private Grid grid;
     // class containing all previously drawn lines
     private LinePool linePool;
+    // class that holts all different tape colors
+    private ColorChooser colorChooser;
+    private int selectedColorIndex;
     // bool in order to save a single frame from the animation
     private boolean savePdf;
     // filename of the exported PDF
@@ -27,6 +30,8 @@ public class PastaPeelPApplet extends PApplet {
         size(800, 800, P2D);
         grid = new Grid( this, 40, 40 );
         linePool = new LinePool( this );
+        colorChooser = new ColorChooser( this );
+        selectedColorIndex = 0;
 
         controlFrame = ControlFrame.createControlFrame( this, "Controls", 400, 600 );
     }
@@ -52,7 +57,7 @@ public class PastaPeelPApplet extends PApplet {
 
     @Override
     public void mousePressed() {
-        linePool.mousePressed( grid );
+        linePool.mousePressed( grid, colorChooser.getColor( selectedColorIndex ) );
     }
 
     @Override
