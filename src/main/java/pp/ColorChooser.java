@@ -1,6 +1,7 @@
 package pp;
 
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 import java.util.ArrayList;
 
@@ -12,10 +13,10 @@ public class ColorChooser {
     private ArrayList< Integer > colors;
     private ArrayList< ColorPalette > palettes;
 
-    /*
-    the ColorChooser Contructor
-
-    @param PApplet parent the PApplet that creates an instance of this. needs to be in order to access data types like 'color'
+    /**
+     * the ColorChooser Contructor
+     *
+     * @param PApplet
      */
     public ColorChooser( PApplet parent ) {
         colors = new ArrayList<>();
@@ -28,32 +29,32 @@ public class ColorChooser {
         colors.add( parent.color( 17, 39, 82 ) ); // dark blue
     }
 
-    /*
-    returns a color from the palette
-
-    @param int index the index of the color from the current palette
-
-    @return int the color, which is stored at the passed index
+    /**
+     * returns a color from the palette
+     *
+     * @param index the index of the color from the current palette
+     *
+     * @return int the color, which is stored at the passed index
      */
     public int getColor( int index ) {
         return colors.get( index );
     }
 
-    /*
-    returns the amount of saved colors.
-
-    @return int the currently available number of colors
+    /**
+     * returns the amount of saved colors.
+     *
+     * @return int the currently available number of colors
      */
     public int getColorCount() {
         return colors.size();
     }
 
-    /*
-    returns the index of a color
-
-    @param int color the color, of which this function returns the index from the palette
-
-    @return int the index of the passed color
+    /**
+     * returns the index of a color
+     *
+     * @param color the color, of which this function returns the index from the palette
+     *
+     * @return int the index of the passed color
      */
     public int getIndexByColor( int color ) {
         int index = 0;
