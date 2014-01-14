@@ -22,12 +22,12 @@ public class ControlFrame extends PApplet {
 
     private int width, height;
 
-    /*
-    The constructor of the ControlFrame
-
-    @param PApplet parent the PApplet, which creates this Applet
-    @param int width the width of the Frame
-    @param int height the height of the Frame
+    /**
+     * The constructor of the ControlFrame
+     *
+     * @param parent the PApplet, which creates this Applet
+     * @param width the width of the Frame
+     * @param height the height of the Frame
      */
     public ControlFrame( PApplet parent, int width, int height ) {
         // casted, in order to call methods created in the PastaPeelPApplet class
@@ -38,8 +38,8 @@ public class ControlFrame extends PApplet {
         this.height = height;
     }
 
-    /*
-    Being called, since this is a PApplet
+    /**
+     * Being called, since this is a PApplet
      */
     public void setup() {
         cp = new ControlP5( this );
@@ -58,36 +58,42 @@ public class ControlFrame extends PApplet {
         cp.setBroadcast( true );
     }
 
-    /*
-    draws the Applet
+    /**
+     * Draws the Applet
      */
     public void draw() {
         background(0);
-        parent.drawCurrentColor( this );
+        parent.drawCurrentColor(this);
     }
 
+    /**
+     * Callback method from the controlP5 library, whenever the 'saveFile' button is clicked
+     */
     @SuppressWarnings( "unused" )
     public void saveFile() {
         String fileName = cp.get( Textfield.class, "savefilename" ).getText();
-        parent.saveConfiguration( fileName + ".lml" );
+        parent.saveConfiguration(fileName + ".lml");
     }
 
+    /**
+     * Callback method from the controlP5 library, whenever the 'loadFile' button is clicked
+     */
     @SuppressWarnings( "unused" )
     public void loadFile() {
         String fileName = cp.get( Textfield.class, "loadfilename" ).getText();
-        parent.loadConfiguration( fileName );
+        parent.loadConfiguration(fileName);
     }
 
-    /*
-    This is where all ControlEvents are being interpreted
-
-    @param ControlEvent e the ControlEvent containing all information about the event
+    /**
+     *This is where all ControlEvents are being interpreted
+     *
+    *  @param e the ControlEvent containing all information about the event
      */
     @SuppressWarnings( "unused" )
     public void controlEvent( ControlEvent e ) {
         switch( e.getName() ){
             case "CHANGE COLOR":
-                parent.randomColor();
+                parent.nextColor();
                 break;
             case "TOGGLE GRID":
                 parent.toggleGrid();
@@ -98,31 +104,31 @@ public class ControlFrame extends PApplet {
         }
     }
 
-    /*
-    Returns the width of the frame
-
-    @return width
+    /**
+     * Returns the width of the frame
+     *
+     * @return width the width of this frame window
      */
     public int getWidth() {
         return this.width;
     }
 
-    /*
-    returns the height of the frame
-
-    @return height
+    /**
+     * returns the height of the frame
+     * 
+    * @return height the height of this frame window
      */
     public int getHeight() {
         return this.height;
     }
 
-    /*
-    static method to create a ControlFrame -> factory?
-
-    @param PApplet _p the parent PApplet
-    @param String name the name of the frame
-    @param int width the width of the frame
-    @param int height the height of the frame
+    /**
+     * static method to create a ControlFrame -> factory?
+     *
+     * @param _p the parent PApplet
+     * @param name the name of the frame
+     * @param width the width of the frame
+     * @param height the height of the frame
      */
     static ControlFrame createControlFrame( PApplet _p, String name, int width, int height ) {
         // creates a new frame with the passed frame name
