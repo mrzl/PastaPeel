@@ -1,8 +1,10 @@
 package pp;
 
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PVector;
+import processing.pdf.*;
 
 import java.io.*;
 import java.util.*;
@@ -50,10 +52,10 @@ public class LinePool {
     /**
      * draws all previously laved lines.
 
-     * @param lineWidth the width of the line
+     * @param grid the grid, chich indicates the width of a line
      */
-    public void drawLines( int lineWidth ) {
-        int index = 0;
+    public void drawLines( Grid grid ) {
+        int lineWidth = ( int )( grid.getCellWidth() );
         Iterator it = lines.entrySet().iterator();
         buffer.beginDraw();
         while( it.hasNext() ) {
@@ -62,8 +64,7 @@ public class LinePool {
             int lineColor = (int ) ( pairs.getValue() );
             Line l = ( Line ) ( pairs.getKey() );
 
-            l.draw( lineColor, lineWidth );
-            index++;
+            l.draw( lineColor, lineWidth, buffer );
         }
         buffer.endDraw();
     }
@@ -85,7 +86,7 @@ public class LinePool {
 
         // always ignoring the first click of a line
         if( !firstClick ) {
-            this.addLine( new Line(buffer, ( int ) ( lastClick.x ), ( int ) ( lastClick.y ), snappedX, snappedY ), lineColor );
+            this.addLine( new Line( ( int ) ( lastClick.x ), ( int ) ( lastClick.y ), snappedX, snappedY ), lineColor );
         }
 
         // saving the current snapped X for the next click
@@ -160,7 +161,7 @@ public class LinePool {
                 PVector start = new PVector( Float.parseFloat( fields[ 0 ] ), Float.parseFloat( fields[ 1 ] ) );
                 PVector end = new PVector( Float.parseFloat( fields[ 2 ] ), Float.parseFloat( fields[ 3 ] ) );
                 int colorIndex = Integer.parseInt( fields[ 4 ] );
-                Line loadedLine = new Line(buffer, start.x, start.y, end.x, end.y );
+                Line loadedLine = new Line( start.x, start.y, end.x, end.y );
                 lines.put( loadedLine, colorChooser.getColor( colorIndex ) );
             }
         } catch( Exception e ) {
@@ -174,5 +175,22 @@ public class LinePool {
                 }
             }
         }
+    }
+
+    public void saveLinesToPDF( String fileName, Grid grid ) {
+        PGraphics pdf = parent.createGraphics(parent.width, parent.height, PConstants.PDF, fileName );
+        pdf.beginDraw();
+
+        Iterator it = lines.entrySet().iterator();
+        while( it.hasNext() ) {
+            Map.Entry pairs = ( Map.Entry )it.next();
+
+            int lineColor = (int ) ( pairs.getValue() );
+            Line l = ( Line ) ( pairs.getKey() );
+
+            l.draw( lineColor, ( int )( grid.getCellWidth() ), pdf );
+        }
+
+        pdf.endDraw();
     }
  }
