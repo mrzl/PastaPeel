@@ -1,3 +1,7 @@
 *.class
 *.iml
 *.name
+.idea/*.xml
+.idea/libraries/*.xml
+.idea/scopes/*.xml
+.idea/copyright/*.xml
