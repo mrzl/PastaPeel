@@ -1,6 +1,7 @@
 package pp;
 
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PVector;
 
 import java.io.*;
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class LinePool {
     private PApplet parent;
+    private PGraphics buffer;
 
     // holds the mouse position of the last click
     private PVector lastClick;
@@ -21,37 +23,39 @@ public class LinePool {
     // the container holding all previously drawn lines
     ConcurrentHashMap< Line, Integer > lines;
 
-    /*
-    LinePool constructor.
+    /**
+     * LinePool constructor.
      */
-    public LinePool( PApplet parent ) {
+    public LinePool( PApplet parent, PGraphics buffer ) {
+        this.buffer = buffer;
         this.parent = parent;
 
-        this.colorChooser = new ColorChooser( this.parent );
+        this.colorChooser = new ColorChooser( parent );
 
         this.firstClick = true;
 
         this.lines = new ConcurrentHashMap<>();
     }
 
-    /*
-    Adds a line to the container.
-
-    @param Line l the line which should be added
-    @param int lineColor the color of the added line
+    /**
+     * Adds a line to the container.
+     *
+     * @param l the line which should be added
+     * @param lineColor the color of the added line
      */
     public void addLine( Line l, int lineColor ) {
         lines.put(l, lineColor);
     }
 
-    /*
-    draws all previously laved lines.
+    /**
+     * draws all previously laved lines.
 
-    @param lineWidth the width of the line
+     * @param lineWidth the width of the line
      */
     public void drawLines( int lineWidth ) {
         int index = 0;
         Iterator it = lines.entrySet().iterator();
+        buffer.beginDraw();
         while( it.hasNext() ) {
             Map.Entry pairs = ( Map.Entry )it.next();
 
@@ -61,18 +65,19 @@ public class LinePool {
             l.draw( lineColor, lineWidth );
             index++;
         }
+        buffer.endDraw();
     }
 
-    /*
-    every time the mouse is pressed another start-/endpoint of lines is stored.
+    /**
+     * every time the mouse is pressed another start-/endpoint of lines is stored.
 
-    @param Grid grid the Grid, which contains information about its size etc.
-    @param int lineColor the currently selected line color
+     * @param grid the Grid, which contains information about its size etc.
+     * @param lineColor the currently selected line color
      */
-    public void mousePressed( Grid grid, int lineColor ) {
+    public void mousePressed( Grid grid, int lineColor, PVector mousePos ) {
         // calculating the X and Y coordinates of the lines snapped to the grid
-        int xIndex = ( int ) ( grid.getActiveIndizesXY().x );
-        int yIndex = ( int ) ( grid.getActiveIndizesXY().y) ;
+        int xIndex = ( int ) ( grid.getActiveIndizesXY( mousePos.x, mousePos.y ).x );
+        int yIndex = ( int ) ( grid.getActiveIndizesXY( mousePos.x, mousePos.y ).y) ;
         int cellWidth = ( int ) ( grid.getCellWidth() );
         int cellHeight = ( int ) ( grid.getCellHeight() );
         int snappedX = xIndex * cellWidth + ( cellWidth / 2 );
@@ -80,7 +85,7 @@ public class LinePool {
 
         // always ignoring the first click of a line
         if( !firstClick ) {
-            this.addLine( new Line( parent, ( int ) ( lastClick.x ), ( int ) ( lastClick.y ), snappedX, snappedY ), lineColor );
+            this.addLine( new Line(buffer, ( int ) ( lastClick.x ), ( int ) ( lastClick.y ), snappedX, snappedY ), lineColor );
         }
 
         // saving the current snapped X for the next click
@@ -90,14 +95,17 @@ public class LinePool {
         firstClick = !firstClick;
     }
 
+    /**
+     * Deletes all saved lines.
+     */
     public void clear() {
         lines.clear();
     }
 
-    /*
-    Saves all currently created lines to a file.
-
-    @param String fileName the name of the file
+    /**
+     * Saves all currently created lines to a file.
+     *
+     * @param fileName the name of the file
      */
     public void saveToFile( String fileName ) {
         BufferedWriter linePoolWriter = null;
@@ -136,10 +144,10 @@ public class LinePool {
         }
     }
 
-    /*
-    Loads lines from a file.
-
-    @param String fileName the filename where the lines are saved
+    /**
+     * Loads lines from a file.
+     *
+     * @param fileName the filename where the lines are saved
      */
     public void loadFromFile( String fileName ) {
         BufferedReader fileReader = null;
@@ -152,7 +160,7 @@ public class LinePool {
                 PVector start = new PVector( Float.parseFloat( fields[ 0 ] ), Float.parseFloat( fields[ 1 ] ) );
                 PVector end = new PVector( Float.parseFloat( fields[ 2 ] ), Float.parseFloat( fields[ 3 ] ) );
                 int colorIndex = Integer.parseInt( fields[ 4 ] );
-                Line loadedLine = new Line( parent, start.x, start.y, end.x, end.y );
+                Line loadedLine = new Line(buffer, start.x, start.y, end.x, end.y );
                 lines.put( loadedLine, colorChooser.getColor( colorIndex ) );
             }
         } catch( Exception e ) {
