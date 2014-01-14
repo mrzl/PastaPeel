@@ -10,14 +10,12 @@ import processing.core.PVector;
  */
 public class Line {
 
-    private PGraphics parent;
     private float x1, x2, y1, y2;
 
     /**
      * Line constructor specifying all coordnates of the line
      */
-    public Line( PGraphics parent, float x1, float y1, float x2, float y2 ) {
-        this.parent = parent;
+    public Line( float x1, float y1, float x2, float y2 ) {
         this.x1 = x1;
         this.x2 = x2;
         this.y1 = y1;
@@ -30,14 +28,14 @@ public class Line {
      * @param color the color of the line
      * @param lineWidth the width of the line
      */
-    void draw( int color, int lineWidth ) {
-        parent.pushStyle();
-        parent.strokeCap(PConstants.PROJECT);
-        parent.stroke(color);
-        parent.strokeWeight( lineWidth );
-        parent.noFill();
-        parent.line( x1, y1, x2, y2 );
-        parent.popStyle();
+    void draw( int color, int lineWidth, PGraphics buffer ) {
+        buffer.pushStyle();
+        buffer.strokeCap(PConstants.PROJECT);
+        buffer.stroke(color);
+        buffer.strokeWeight( lineWidth );
+        buffer.noFill();
+        buffer.line( x1, y1, x2, y2 );
+        buffer.popStyle();
     }
 
     /**
