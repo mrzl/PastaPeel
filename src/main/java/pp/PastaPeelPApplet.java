@@ -7,6 +7,7 @@ import processing.core.PGraphics;
 import processing.core.PVector;
 import processing.opengl.PGraphics2D;
 
+import java.io.File;
 import java.util.Calendar;
 
 /**
@@ -21,8 +22,6 @@ public class PastaPeelPApplet extends PApplet {
     // class that holts all different tape colors
     private ColorChooser colorChooser;
     private int selectedColorIndex;
-    // bool in order to save a single frame from the animation
-    private boolean savePdf;
     // filename of the exported PDF
     private String currentFileNamePDF;
     // filename of the exported PNG
@@ -43,7 +42,7 @@ public class PastaPeelPApplet extends PApplet {
         size(800, 800, P2D);
         buffer = createGraphics( width, height, P2D );
 
-        grid = new Grid( this, buffer, 50, 50 );
+        grid = new Grid( this, buffer, 20, 20 );
         linePool = new LinePool( this, buffer );
         colorChooser = new ColorChooser( this );
         selectedColorIndex = 0;
@@ -70,23 +69,14 @@ public class PastaPeelPApplet extends PApplet {
         if( this.frame != null ){
             frame.setTitle( ( int ) ( this.frameRate ) + "fps" );
         }
-        if( savePdf ) {
-            beginRecord(PDF, currentFileNamePDF);
-        }
 
-        if( !savePdf ) {
-            if( drawGrid ) {
-                grid.draw();
-            }
-            PVector surfaceMouse = surface.getTransformedMouse();
-            grid.drawActiveBox( surfaceMouse );
+        if( drawGrid ) {
+            grid.draw();
         }
+        PVector surfaceMouse = surface.getTransformedMouse();
+        grid.drawActiveBox( surfaceMouse );
 
-        linePool.drawLines( ( int )( grid.getCellWidth() ) );
-        if( savePdf ) {
-            endRecord();
-            savePdf = false;
-        }
+        linePool.drawLines( grid );
 
         surface.render( buffer );
     }
@@ -96,8 +86,11 @@ public class PastaPeelPApplet extends PApplet {
      */
     @Override
     public void mousePressed() {
-        PVector surfaceMouse = surface.getTransformedMouse();
-        linePool.mousePressed( grid, colorChooser.getColor( selectedColorIndex ), surfaceMouse );
+        // only draw lines if in presentation mode- this avoids accidentally drawn lines
+        if( !ks.isCalibrating() ) {
+            PVector surfaceMouse = surface.getTransformedMouse();
+            linePool.mousePressed( grid, colorChooser.getColor( selectedColorIndex ), surfaceMouse );
+        }
     }
 
     /**
@@ -132,6 +125,7 @@ public class PastaPeelPApplet extends PApplet {
      * @param lastLinesFileName the filename of the .lml file
      */
     protected void saveConfiguration( String lastLinesFileName ) {
+        lastLinesFileName = "saved" + File.separator + lastLinesFileName;
         linePool.saveToFile( lastLinesFileName );
         System.out.println( "Saved lines to " +  lastLinesFileName);
     }
@@ -142,10 +136,14 @@ public class PastaPeelPApplet extends PApplet {
      * @param loadLinesFileName the file name of the .lml file
      */
     protected void loadConfiguration( String loadLinesFileName ) {
+        this.clearLines();
         linePool.loadFromFile( loadLinesFileName );
         System.out.println( "Loaded lines from " + loadLinesFileName );
     }
 
+    /**
+     * Deletes all currently drawn lines from the LinePool
+     */
     protected void clearLines() {
         linePool.clear();
     }
@@ -153,8 +151,8 @@ public class PastaPeelPApplet extends PApplet {
      * Saves a PDF with the current output.
      */
      private void savePDF() {
-         savePdf = true;
          currentFileNamePDF = "pasta_peel-" + getTimeStamp() + ".pdf";
+         linePool.saveLinesToPDF( currentFileNamePDF, grid );
     }
 
     /**
